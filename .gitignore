@@ -1,0 +1,21 @@
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+*.tfplan
+
+# Local Terraform configuration files
+.terraform/
+.terraform.lock.hcl
+
+# IDE or Editor specific files
+*.swp
+*.swo
+*.DS_Store
+*.vscode/
+.idea/
+
+# Ignore Terraform workspace files
+terraform.tfstate
+terraform.tfstate.backup
