@@ -182,7 +182,7 @@ resource "azurerm_key_vault_access_policy" "app_access_policy" {
 
 resource "azurerm_key_vault_secret" "sql_admin_password" {
   name         = "sqlAdminPassword"
-  value        = "YourStrongPassword123!"
+  value        = var.TF_VAR_password_for_sql
   key_vault_id = azurerm_key_vault.kv.id
 }
 
