@@ -1,32 +1,9 @@
-terraform {
-  backend "azurerm" {
-    resource_group_name  = "beStrongTfState"
-    storage_account_name = "backendaccount302"
-    container_name       = "tfstate"
-    key                  = "beststrong.tfstate"
-  }
-}
-
-provider "azurerm" {
-  subscription_id = "bcc92c21-80be-4af0-ab7b-38dc7d79ab16"
-  features {}
-}
-
-provider "http" {}
 
 # Data Source for Azure Client Configuration
 data "azurerm_client_config" "current" {}
 
 data "http" "my_ip" {
   url = "https://ipinfo.io/ip"
-}
-
-# Define variables
-variable "location" {
-  default = "polandcentral"
-}
-variable "resource_group_name" {
-  default = "beStrongApp"
 }
 
 # Resource Group
@@ -48,14 +25,14 @@ resource "azurerm_subnet" "subnet-app" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-  service_endpoints = ["Microsoft.KeyVault", "Microsoft.Sql", "Microsoft.Storage"]
+  service_endpoints    = ["Microsoft.KeyVault", "Microsoft.Sql", "Microsoft.Storage"]
   delegation {
-      name = "webAppDelegation"
-      service_delegation {
-        name    = "Microsoft.Web/serverFarms"
-        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-      }
+    name = "webAppDelegation"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
     }
+  }
 }
 
 resource "azurerm_subnet" "subnet-sql" {
@@ -63,8 +40,8 @@ resource "azurerm_subnet" "subnet-sql" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
-  service_endpoints = ["Microsoft.Sql", "Microsoft.KeyVault"]
-  
+  service_endpoints    = ["Microsoft.Sql", "Microsoft.KeyVault"]
+
 }
 
 resource "azurerm_subnet" "subnet-kv" {
@@ -72,7 +49,7 @@ resource "azurerm_subnet" "subnet-kv" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.3.0/24"]
-  service_endpoints = ["Microsoft.KeyVault"]
+  service_endpoints    = ["Microsoft.KeyVault"]
 }
 
 resource "azurerm_subnet" "storage_subnet" {
@@ -105,10 +82,10 @@ resource "azurerm_app_service" "app" {
   }
 
   app_settings = {
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.app_insights.instrumentation_key
-    "AzureWebJobsStorage" = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.storage_account.name};AccountKey=${azurerm_storage_account.storage_account.primary_access_key};EndpointSuffix=core.windows.net"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"           = azurerm_application_insights.app_insights.instrumentation_key
+    "AzureWebJobsStorage"                      = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.storage_account.name};AccountKey=${azurerm_storage_account.storage_account.primary_access_key};EndpointSuffix=core.windows.net"
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.storage_account.name};AccountKey=${azurerm_storage_account.storage_account.primary_access_key};EndpointSuffix=core.windows.net"
-    "WEBSITE_CONTENTSHARE" = azurerm_storage_share.file_share.name
+    "WEBSITE_CONTENTSHARE"                     = azurerm_storage_share.file_share.name
   }
 }
 
@@ -138,9 +115,9 @@ resource "azurerm_container_registry" "acr" {
 
 # Role Assignment for App Service Identity to access ACR
 resource "azurerm_role_assignment" "acr_pull" {
-  principal_id           = azurerm_app_service.app.identity[0].principal_id
-  role_definition_name   = "AcrPull"
-  scope                  = azurerm_container_registry.acr.id
+  principal_id         = azurerm_app_service.app.identity[0].principal_id
+  role_definition_name = "AcrPull"
+  scope                = azurerm_container_registry.acr.id
 }
 
 # Key Vault
@@ -152,20 +129,20 @@ resource "azurerm_key_vault" "kv" {
 
   tenant_id = data.azurerm_client_config.current.tenant_id
 
-  
+
 
   network_acls {
-      default_action = "Deny"
-      bypass         = "AzureServices"
+    default_action = "Deny"
+    bypass         = "AzureServices"
 
-      # Allow
-      virtual_network_subnet_ids = [
-        azurerm_subnet.subnet-app.id,
-        azurerm_subnet.subnet-sql.id,
-        azurerm_subnet.subnet-kv.id
-      ]
+    # Allow
+    virtual_network_subnet_ids = [
+      azurerm_subnet.subnet-app.id,
+      azurerm_subnet.subnet-sql.id,
+      azurerm_subnet.subnet-kv.id
+    ]
 
-      ip_rules = [trimspace(data.http.my_ip.response_body)]
+    ip_rules = [trimspace(data.http.my_ip.response_body)]
 
   }
 }
@@ -185,13 +162,13 @@ resource "azurerm_private_endpoint" "kv_private_endpoint" {
   }
 }
 
-# Дозвіл для Terraform користувача або сервісного облікового запису
+# Key Vault Access Policy for Azure user
 resource "azurerm_key_vault_access_policy" "user_access_policy" {
-    key_vault_id = azurerm_key_vault.kv.id
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id # Поточний користувач або сервісний обліковий запис
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id # Поточний користувач або сервісний обліковий запис
 
-    secret_permissions = ["Get", "List", "Set"]
+  secret_permissions = ["Get", "List", "Set"]
 }
 
 # Key Vault Access Policy for App Service Identity
@@ -228,11 +205,11 @@ resource "azurerm_mssql_database" "sql_db" {
   max_size_gb          = 32
   zone_redundant       = true
   storage_account_type = "Zone"
-  read_replica_count   = "1" 
+  read_replica_count   = "1"
 
 }
 
-# Приватний підключення для SQL Database
+# Endpoint for database
 resource "azurerm_private_endpoint" "sql_private_endpoint" {
   name                = "pe-sql-beststrong"
   location            = azurerm_resource_group.rg.location
@@ -254,7 +231,7 @@ resource "azurerm_mssql_virtual_network_rule" "sql-rule" {
 }
 
 
-# Обліковий запис зберігання
+# Storage account
 resource "azurerm_storage_account" "storage_account" {
   name                     = "beststrongstorage"
   resource_group_name      = azurerm_resource_group.rg.name
@@ -262,7 +239,7 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
- network_rules {
+  network_rules {
     default_action = "Deny"
     bypass         = ["AzureServices"]
 
@@ -271,10 +248,10 @@ resource "azurerm_storage_account" "storage_account" {
     ]
 
     ip_rules = [trimspace(data.http.my_ip.response_body)]
- }
+  }
 }
 
-# Приватна кінцева точка для облікового запису зберігання
+# Privat endpoint for storage
 resource "azurerm_private_endpoint" "storage_private_endpoint" {
   name                = "pe-storage-beststrong"
   location            = azurerm_resource_group.rg.location
