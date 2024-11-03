@@ -1,11 +1,17 @@
 # Define variables
 variable "location" {
-  default = "polandcentral"
+  description = "Location for majority resourse"
+  default     = "polandcentral"
 }
 variable "resource_group_name" {
-  default = "beStrongApp"
+  description = "Name for resourse group"
+  default     = "beStrongApp"
 }
-variable "TF_VAR_password_for_sql" {
-  description = "Password"
-  type        = string
+variable "password_for_sql" {
+  description = "Password for sql server"
+  sensitive = true
+}
+variable "login_for_sql" {
+  description = "Login for sql server"
+  sensitive   = true
 }

@@ -86,6 +86,8 @@ resource "azurerm_app_service" "app" {
     "AzureWebJobsStorage"                      = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.storage_account.name};AccountKey=${azurerm_storage_account.storage_account.primary_access_key};EndpointSuffix=core.windows.net"
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.storage_account.name};AccountKey=${azurerm_storage_account.storage_account.primary_access_key};EndpointSuffix=core.windows.net"
     "WEBSITE_CONTENTSHARE"                     = azurerm_storage_share.file_share.name
+    "WEBSITE_VNET_ROUTE_ALL"                   = true
+    WEBSITE_CONTENTOVERVNET                    = 1
   }
 }
 
@@ -109,8 +111,7 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = "westeurope"
   sku                 = "Basic"
-
-  admin_enabled = true
+  admin_enabled       = true
 }
 
 # Role Assignment for App Service Identity to access ACR
@@ -168,7 +169,7 @@ resource "azurerm_key_vault_access_policy" "user_access_policy" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azurerm_client_config.current.object_id # Поточний користувач або сервісний обліковий запис
 
-  secret_permissions = ["Get", "List", "Set"]
+  secret_permissions = ["Get", "List", "Set", "Delete", "Purge"]
 }
 
 # Key Vault Access Policy for App Service Identity
@@ -182,8 +183,18 @@ resource "azurerm_key_vault_access_policy" "app_access_policy" {
 
 resource "azurerm_key_vault_secret" "sql_admin_password" {
   name         = "sqlAdminPassword"
-  value        = var.TF_VAR_password_for_sql
+  value        = var.password_for_sql
   key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on   = [ azurerm_key_vault_access_policy.user_access_policy ]
+}
+
+resource "azurerm_key_vault_secret" "sql_admin_loggin" {
+  name         = "sqlAdminLoggin"
+  value        = var.login_for_sql
+  key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on   = [ azurerm_key_vault_access_policy.user_access_policy ]
 }
 
 # SQL Server
@@ -192,20 +203,23 @@ resource "azurerm_mssql_server" "sql_server" {
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
-  administrator_login          = "sqladmin"
-  administrator_login_password = azurerm_key_vault_secret.sql_admin_password.value
+  administrator_login          = var.login_for_sql
+  administrator_login_password = var.password_for_sql
 
+  depends_on = [ azurerm_key_vault.kv ]
 }
 
 # SQL Database
 resource "azurerm_mssql_database" "sql_db" {
   name                 = "db-bestrong"
   server_id            = azurerm_mssql_server.sql_server.id
-  sku_name             = "GP_Gen5_2"
+  sku_name            = "GP_S_Gen5_2"
   max_size_gb          = 32
   zone_redundant       = true
   storage_account_type = "Zone"
-  read_replica_count   = "1"
+  read_replica_count   = 1
+  min_capacity         = 2
+  auto_pause_delay_in_minutes = 60
 
 }
 
@@ -264,6 +278,7 @@ resource "azurerm_private_endpoint" "storage_private_endpoint" {
     private_connection_resource_id = azurerm_storage_account.storage_account.id
     subresource_names              = ["file"]
   }
+
 }
 
 resource "azurerm_storage_share" "file_share" {
