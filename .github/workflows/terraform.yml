@@ -17,9 +17,9 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - checkout: self
-          - script: apt update & apt install terraform
-            displayName: "Install Terraform"
+          - task: TerraformInstaller@0
+            inputs:
+              terraformVersion: 'latest'
               
           - script: terraform init
             displayName: "Terraform Init"
