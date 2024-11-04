@@ -1,46 +1,31 @@
+trigger:
+  branches:
+    include:
+      - main
 
-name: 'Terraform'
+pr:
+  branches:
+    include:
+      - "*"
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
+stages:
+  - stage: CI
+    displayName: "CI on PR"
+    jobs:
+      - job: PR_Validation
+        displayName: "Terraform Validation on PR"
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+          - script: apt update & apt install terraform
+            displayName: "Install Terraform"
+              
+          - script: terraform init
+            displayName: "Terraform Init"
 
-permissions:
-  contents: read
+          - script: terraform validate
+            displayName: "Terraform Validate"
 
-jobs:
-  terraform:
-    name: 'Terraform'
-    runs-on: ubuntu-latest
-    environment: production
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
-
-    # Checks that all Terraform configuration files are valid
-    - name: Terraform Validate
-      run: terraform validate
-
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: terraform plan -input=false
-
-    # - name: Terraform Apply
-    #   if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-    #   run: terraform apply -auto-approve -input=false
+          - script: terraform plan -out=tfplan
+            displayName: "Terraform Plan"
