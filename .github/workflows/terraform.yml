@@ -17,6 +17,15 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: '<Your-Service-Connection-Name>'
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  az account show
+                displayName: "Azure CLI Login"
+                
           - task: TerraformInstaller@0
             inputs:
               terraformVersion: 'latest'
