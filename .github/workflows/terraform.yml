@@ -21,6 +21,8 @@ stages:
             inputs:
               azureSubscription: 'AzureARMPersonalAccount'
               scriptType: 'bash'
+              addSpnToEnvironment: true
+              useGlobalConfig: true
               scriptLocation: 'inlineScript'
               inlineScript: |
                 az account show
