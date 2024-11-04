@@ -61,7 +61,7 @@ resource "azurerm_subnet" "storage_subnet" {
 
 # App Service Plan
 resource "azurerm_app_service_plan" "app_plan" {
-  name                = "asp-bestrong"
+  name                = "asp-bestrong01"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   sku {
@@ -72,7 +72,7 @@ resource "azurerm_app_service_plan" "app_plan" {
 
 # App Service
 resource "azurerm_app_service" "app" {
-  name                = "app-bestrong"
+  name                = "app-bestrong01"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   app_service_plan_id = azurerm_app_service_plan.app_plan.id
@@ -107,7 +107,7 @@ resource "azurerm_application_insights" "app_insights" {
 
 # Azure Container Registry (ACR)
 resource "azurerm_container_registry" "acr" {
-  name                = "acrbestrong"
+  name                = "acrbestrong01"
   resource_group_name = azurerm_resource_group.rg.name
   location            = "westeurope"
   sku                 = "Basic"
@@ -247,7 +247,7 @@ resource "azurerm_mssql_virtual_network_rule" "sql-rule" {
 
 # Storage account
 resource "azurerm_storage_account" "storage_account" {
-  name                     = "beststrongstorage"
+  name                     = "beststrongstorage01"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
