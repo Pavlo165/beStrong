@@ -1,0 +1,56 @@
+# Starter pipeline
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'AzureARMPersonalAccount'
+    scriptType: 'bash'
+    addSpnToEnvironment: true
+    useGlobalConfig: true
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az account show
+      echo "##vso[task.setvariable variable=ARM_CLIENT_ID]$(az account get-access-token --query accessToken -o tsv)"
+      echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET]$(az account get-access-token --query tokenType -o tsv)"
+      echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$(az account show --query id -o tsv)"
+      echo "##vso[task.setvariable variable=ARM_TENANT_ID]$(az account show --query tenantId -o tsv)"
+    displayName: "Azure CLI Login"
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'AzureARMPersonalAccount'
+    backendAzureRmResourceGroupName: 'beStrongTfState'
+    backendAzureRmStorageAccountName: 'backendaccount304'
+    backendAzureRmContainerName: 'tfstatebestrong'
+    backendAzureRmKey: 'beststrong.tfstate'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'validate'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
