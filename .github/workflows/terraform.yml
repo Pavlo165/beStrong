@@ -33,7 +33,7 @@ stages:
                 echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET]$(az account get-access-token --query tokenType -o tsv)"
                 echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$(az account show --query id -o tsv)"
                 echo "##vso[task.setvariable variable=ARM_TENANT_ID]$(az account show --query tenantId -o tsv)"
-              displayName: "Azure CLI Login"
+            displayName: "Azure CLI Login"
 
           - task: TerraformTaskV4@4
             inputs:
@@ -44,20 +44,20 @@ stages:
               backendAzureRmStorageAccountName: 'backendaccount304'
               backendAzureRmContainerName: 'tfstatebestrong'
               backendAzureRmKey: 'beststrong.tfstate'
-              displayName: "Terraform Init"
+            displayName: "Terraform Init"
 
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'validate'
-              displayName: "Terraform Validate"
+            displayName: "Terraform Validate"
 
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'plan'
               environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
-              displayName: "Terraform Plan"
+            displayName: "Terraform Plan"
             env:
               TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
               TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
