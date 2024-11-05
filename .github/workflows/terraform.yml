@@ -44,17 +44,20 @@ stages:
               backendAzureRmStorageAccountName: 'backendaccount304'
               backendAzureRmContainerName: 'tfstatebestrong'
               backendAzureRmKey: 'beststrong.tfstate'
+              displayName: "Terraform Init"
 
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'validate'
+              displayName: "Terraform Validate"
 
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'plan'
               environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+              displayName: "Terraform Plan"
             env:
               TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
               TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
