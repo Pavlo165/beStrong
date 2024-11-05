@@ -8,6 +8,9 @@ pr:
     include:
       - "*"
 
+variables:
+- group: terrafrom_var
+
 stages:
   - stage: CI
     displayName: "CI on PR"
@@ -52,3 +55,6 @@ stages:
               provider: 'azurerm'
               command: 'plan'
               environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+            env:
+              TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+              TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
