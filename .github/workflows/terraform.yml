@@ -96,6 +96,17 @@ stages:
               - task: TerraformTaskV4@4
                 inputs:
                   provider: 'azurerm'
+                  command: 'init'
+                  backendServiceArm: 'AzureARMPersonalAccount'
+                  backendAzureRmResourceGroupName: 'beStrongTfState'
+                  backendAzureRmStorageAccountName: 'backendaccount304'
+                  backendAzureRmContainerName: 'tfstatebestrong'
+                  backendAzureRmKey: 'beststrong.tfstate'
+                displayName: "Terraform Init"
+
+              - task: TerraformTaskV4@4
+                inputs:
+                  provider: 'azurerm'
                   command: 'apply'
                   environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
                   commandOptions: '-auto-approve'
