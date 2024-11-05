@@ -20,6 +20,8 @@ steps:
     scriptType: 'batch'
     scriptLocation: 'inlineScript'
     inlineScript: 'az account show'
+    addSpnToEnvironment: true
+    useGlobalConfig: true
 
 - task: TerraformTaskV4@4
   inputs:
