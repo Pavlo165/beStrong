@@ -68,18 +68,21 @@ stages:
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
       - deployment: ApplyTerraform
-        displayName: "Manual Approval for Apply"
+        displayName: "Approval for Apply"
         environment: "production"
         pool:
           vmImage: 'ubuntu-latest'
-        steps:
-          - task: TerraformTaskV4@4
-            inputs:
-              provider: 'azurerm'
-              command: 'apply'
-              environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
-              additionalArguments: '-auto-approve'
-            displayName: "Terraform Apply"
-            env:
-              TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
-              TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: TerraformTaskV4@4
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'apply'
+                    environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+                    additionalArguments: '-auto-approve'
+                  displayName: "Terraform Apply"
+                  env:
+                    TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+                    TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
