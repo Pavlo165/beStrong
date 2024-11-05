@@ -12,11 +12,11 @@ variables:
 - group: terrafrom_var
 
 stages:
-  - stage: CI
-    displayName: "CI on PR"
+  - stage: Plan
+    displayName: "Terraform plan on PR"
     jobs:
-      - job: PR_Validation
-        displayName: "Terraform Validation on PR"
+      - job: PR_Plan
+        displayName: "Terraform Plan on PR"
         pool:
           vmImage: 'ubuntu-latest'
         steps:
@@ -58,6 +58,29 @@ stages:
               command: 'plan'
               environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
             displayName: "Terraform Plan"
+            env:
+              TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+              TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+
+ stages:
+  - stage: Apply
+    displayName: "Apply Terraform Changes"
+    dependsOn: Plan
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: ApplyTerraform
+        displayName: "Manual Approval for Apply"
+        environment: "production"
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: TerraformTaskV4@4
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+              additionalArguments: '-auto-approve'
+            displayName: "Terraform Apply"
             env:
               TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
               TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
