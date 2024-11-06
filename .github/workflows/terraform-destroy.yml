@@ -1,0 +1,59 @@
+variables:
+- group: terrafrom_var
+
+stages:
+  - stage: ddestroy
+    displayName: "Terraform destroy on PR"
+    jobs:
+      - job: PR_Plan
+        displayName: "Terraform Destroyn on PR"
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'AzureARMPersonalAccount'
+              scriptType: 'bash'
+              addSpnToEnvironment: true
+              useGlobalConfig: true
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az account show
+                echo "##vso[task.setvariable variable=ARM_CLIENT_ID]$(az account get-access-token --query accessToken -o tsv)"
+                echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET]$(az account get-access-token --query tokenType -o tsv)"
+                echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$(az account show --query id -o tsv)"
+                echo "##vso[task.setvariable variable=ARM_TENANT_ID]$(az account show --query tenantId -o tsv)"
+            displayName: "Azure CLI Login"
+
+          - task: TerraformTaskV4@4
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'AzureARMPersonalAccount'
+              backendAzureRmResourceGroupName: 'beStrongTfState'
+              backendAzureRmStorageAccountName: 'backendaccount304'
+              backendAzureRmContainerName: 'tfstatebestrong'
+              backendAzureRmKey: 'beststrong.tfstate'
+            displayName: "Terraform Init"
+
+          - task: TerraformTaskV4@4
+                inputs:
+                  provider: 'azurerm'
+                  command: 'apply'
+                  environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+                  commandOptions: '-auto-approve'
+                displayName: "Terraform Apply"
+                env:
+                  TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+                  TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+
+          - task: TerraformTaskV4@4
+                inputs:
+                  provider: 'azurerm'
+                  command: 'destroy'
+                  environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+                  commandOptions: '-auto-approve'
+                displayName: "Terraform Destroy"
+                env:
+                  TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+                  TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
