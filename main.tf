@@ -143,7 +143,7 @@ resource "azurerm_key_vault" "kv" {
       azurerm_subnet.subnet-kv.id
     ]
 
-    ip_rules = [trimspace(data.http.my_ip.response_body)]
+    ip_rules = [trimspace(data.http.my_ip.response_body), "213.174.1.9"]
 
   }
 }
@@ -261,7 +261,7 @@ resource "azurerm_storage_account" "storage_account" {
       azurerm_subnet.subnet-app.id
     ]
 
-    ip_rules = [trimspace(data.http.my_ip.response_body)]
+    ip_rules = [trimspace(data.http.my_ip.response_body), "213.174.1.9"]
   }
 }
 
