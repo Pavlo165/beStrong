@@ -20,16 +20,16 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'AzureARMPersonalAccount'
-              scriptType: 'bash'
-              addSpnToEnvironment: true
-              useGlobalConfig: true
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                az account show
-            displayName: "Azure CLI Login"
+          # - task: AzureCLI@2
+          #   inputs:
+          #     azureSubscription: 'AzureARMPersonalAccount'
+          #     scriptType: 'bash'
+          #     addSpnToEnvironment: true
+          #     useGlobalConfig: true
+          #     scriptLocation: 'inlineScript'
+          #     inlineScript: |
+          #       az account show
+          #   displayName: "Azure CLI Login"
 
           - task: TerraformTaskV4@4
             inputs:
@@ -74,16 +74,16 @@ stages:
               steps:
               - checkout: self
                 displayName: "Checkout repository"
-              - task: AzureCLI@2
-                inputs:
-                  azureSubscription: 'AzureARMPersonalAccount'
-                  scriptType: 'bash'
-                  addSpnToEnvironment: true
-                  useGlobalConfig: true
-                  scriptLocation: 'inlineScript'
-                  inlineScript: |
-                    az account show
-                displayName: "Azure CLI Login for Apply"
+              # - task: AzureCLI@2
+              #   inputs:
+              #     azureSubscription: 'AzureARMPersonalAccount'
+              #     scriptType: 'bash'
+              #     addSpnToEnvironment: true
+              #     useGlobalConfig: true
+              #     scriptLocation: 'inlineScript'
+              #     inlineScript: |
+              #       az account show
+              #   displayName: "Azure CLI Login for Apply"
 
               - task: TerraformTaskV4@4
                 inputs:
