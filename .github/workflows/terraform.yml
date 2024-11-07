@@ -10,6 +10,7 @@ pr:
 
 variables:
 - group: terrafrom_var
+- group: Azure
 
 stages:
   - stage: Plan
@@ -20,26 +21,15 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          # - task: AzureCLI@2
-          #   inputs:
-          #     azureSubscription: 'AzureARMPersonalAccount'
-          #     scriptType: 'bash'
-          #     addSpnToEnvironment: true
-          #     useGlobalConfig: true
-          #     scriptLocation: 'inlineScript'
-          #     inlineScript: |
-          #       az account show
-          #   displayName: "Azure CLI Login"
-
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'init'
-              backendServiceArm: 'AzureARMPersonalAccount'
-              backendAzureRmResourceGroupName: 'beStrongTfState'
-              backendAzureRmStorageAccountName: 'backendaccount304'
-              backendAzureRmContainerName: 'tfstatebestrong'
-              backendAzureRmKey: 'beststrong.tfstate'
+              backendServiceArm: $(ServiceConnection)
+              backendAzureRmResourceGroupName: $(backendGroup)
+              backendAzureRmStorageAccountName: $(backendStorage)
+              backendAzureRmContainerName: $(backendContainer)
+              backendAzureRmKey: $(backendKey)
             displayName: "Terraform Init"
 
           - task: TerraformTaskV4@4
@@ -74,26 +64,16 @@ stages:
               steps:
               - checkout: self
                 displayName: "Checkout repository"
-              # - task: AzureCLI@2
-              #   inputs:
-              #     azureSubscription: 'AzureARMPersonalAccount'
-              #     scriptType: 'bash'
-              #     addSpnToEnvironment: true
-              #     useGlobalConfig: true
-              #     scriptLocation: 'inlineScript'
-              #     inlineScript: |
-              #       az account show
-              #   displayName: "Azure CLI Login for Apply"
 
               - task: TerraformTaskV4@4
                 inputs:
                   provider: 'azurerm'
                   command: 'init'
-                  backendServiceArm: 'AzureARMPersonalAccount'
-                  backendAzureRmResourceGroupName: 'beStrongTfState'
-                  backendAzureRmStorageAccountName: 'backendaccount304'
-                  backendAzureRmContainerName: 'tfstatebestrong'
-                  backendAzureRmKey: 'beststrong.tfstate'
+                  backendServiceArm: $(ServiceConnection)
+                  backendAzureRmResourceGroupName: $(backendGroup)
+                  backendAzureRmStorageAccountName: $(backendStorage)
+                  backendAzureRmContainerName: $(backendContainer)
+                  backendAzureRmKey: $(backendKey)
                 displayName: "Terraform Init"
 
               - task: TerraformTaskV4@4
