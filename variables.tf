@@ -1,7 +1,7 @@
 # Define variables
 variable "location" {
   description = "Location for majority resourse"
-  default     = "polandcentral"
+  default     = "westeurope"
 }
 variable "resource_group_name" {
   description = "Name for resourse group"

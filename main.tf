@@ -107,7 +107,7 @@ resource "azurerm_application_insights" "app_insights" {
 
 # Azure Container Registry (ACR)
 resource "azurerm_container_registry" "acr" {
-  name                = "acrbestrong01"
+  name                = "acrbestrong02"
   resource_group_name = azurerm_resource_group.rg.name
   location            = "westeurope"
   sku                 = "Basic"
@@ -143,7 +143,7 @@ resource "azurerm_key_vault" "kv" {
       azurerm_subnet.subnet-kv.id
     ]
 
-    ip_rules = [trimspace(data.http.my_ip.response_body), "213.174.1.9"]
+    ip_rules = [trimspace(data.http.my_ip.response_body)]
 
   }
 }
@@ -247,7 +247,7 @@ resource "azurerm_mssql_virtual_network_rule" "sql-rule" {
 
 # Storage account
 resource "azurerm_storage_account" "storage_account" {
-  name                     = "beststrongstorage01"
+  name                     = "beststrongstorage02"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -261,7 +261,7 @@ resource "azurerm_storage_account" "storage_account" {
       azurerm_subnet.subnet-app.id
     ]
 
-    ip_rules = [trimspace(data.http.my_ip.response_body), "213.174.1.9"]
+    ip_rules = [trimspace(data.http.my_ip.response_body)]
   }
 }
 
