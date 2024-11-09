@@ -48,8 +48,8 @@ stages:
               command: 'destroy'
               environmentServiceNameAzureRM: $(ServiceConnection)
               commandOptions: '-auto-approve'
-              displayName: "Terraform Destroy"
-              env:
-                TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
-                TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
-                TF_VAR_org_ip: $(TF_VAR_org_ip)
+            displayName: "Terraform Destroy"
+            env:
+              TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+              TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+              TF_VAR_org_ip: $(TF_VAR_org_ip)
