@@ -24,10 +24,10 @@ stages:
 
           - task: AzureCLI@2
             inputs:
-             azureSubscription: $(ServiceConnection)
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: |
+              azureSubscription: $(ServiceConnection)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
                 MY_IP=$(curl -s ifconfig.me)
                 az storage account network-rule add \
                   --resource-group "beStrongApp" \
@@ -40,13 +40,13 @@ stages:
             displayName: "Fix firewall rule"
 
           - task: TerraformTaskV4@4
-                inputs:
-                  provider: 'azurerm'
-                  command: 'destroy'
-                  environmentServiceNameAzureRM: $(ServiceConnection)
-                  commandOptions: '-auto-approve'
-                displayName: "Terraform Destroy"
-                env:
-                  TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
-                  TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
-                  TF_VAR_org_ip: $(TF_VAR_org_ip)
+            inputs:
+              provider: 'azurerm'
+              command: 'destroy'
+              environmentServiceNameAzureRM: $(ServiceConnection)
+              commandOptions: '-auto-approve'
+              displayName: "Terraform Destroy"
+              env:
+                TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
+                TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+                TF_VAR_org_ip: $(TF_VAR_org_ip)
