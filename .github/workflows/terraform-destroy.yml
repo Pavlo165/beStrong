@@ -1,8 +1,9 @@
 variables:
 - group: terrafrom_var
+- group: Azure
 
 stages:
-  - stage: ddestroy
+  - stage: destroy
     displayName: "Terraform destroy on PR"
     jobs:
       - job: PR_Plan
@@ -10,50 +11,42 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'AzureARMPersonalAccount'
-              scriptType: 'bash'
-              addSpnToEnvironment: true
-              useGlobalConfig: true
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                az account show
-                echo "##vso[task.setvariable variable=ARM_CLIENT_ID]$(az account get-access-token --query accessToken -o tsv)"
-                echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET]$(az account get-access-token --query tokenType -o tsv)"
-                echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$(az account show --query id -o tsv)"
-                echo "##vso[task.setvariable variable=ARM_TENANT_ID]$(az account show --query tenantId -o tsv)"
-            displayName: "Azure CLI Login"
-
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'init'
-              backendServiceArm: 'AzureARMPersonalAccount'
-              backendAzureRmResourceGroupName: 'beStrongTfState'
-              backendAzureRmStorageAccountName: 'backendaccount304'
-              backendAzureRmContainerName: 'tfstatebestrong'
-              backendAzureRmKey: 'beststrong.tfstate'
+              backendServiceArm: $(ServiceConnection)
+              backendAzureRmResourceGroupName: $(backendGroup)
+              backendAzureRmStorageAccountName: $(backendStorage)
+              backendAzureRmContainerName: $(backendContainer)
+              backendAzureRmKey: $(backendKey)
             displayName: "Terraform Init"
 
-          - task: TerraformTaskV4@4
+          - task: AzureCLI@2
                 inputs:
-                  provider: 'azurerm'
-                  command: 'apply'
-                  environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
-                  commandOptions: '-auto-approve'
-                displayName: "Terraform Apply"
-                env:
-                  TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
-                  TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+                  azureSubscription: $(ServiceConnection)
+                  scriptType: 'bash'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                    MY_IP=$(curl -s ifconfig.me)
+                    az storage account network-rule add \
+                      --resource-group "beStrongApp" \
+                      --account-name "beststrongstorage02" \
+                      --ip-address $MY_IP
+                    az keyvault network-rule add \
+                      --resource-group "beStrongApp" \
+                      --name "kv-bestrong" \
+                      --ip-address $MY_IP
+                  displayName: "Fix firewall rule"
 
           - task: TerraformTaskV4@4
                 inputs:
                   provider: 'azurerm'
                   command: 'destroy'
-                  environmentServiceNameAzureRM: 'AzureARMPersonalAccount'
+                  environmentServiceNameAzureRM: $(ServiceConnection)
                   commandOptions: '-auto-approve'
                 displayName: "Terraform Destroy"
                 env:
                   TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
                   TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+                  TF_VAR_org_ip: $(TF_VAR_org_ip)
