@@ -186,7 +186,7 @@ resource "azurerm_key_vault_secret" "sql_admin_password" {
   value        = var.password_for_sql
   key_vault_id = azurerm_key_vault.kv.id
 
-  depends_on   = [ azurerm_key_vault_access_policy.user_access_policy ]
+  depends_on = [azurerm_key_vault_access_policy.user_access_policy]
 }
 
 resource "azurerm_key_vault_secret" "sql_admin_loggin" {
@@ -194,7 +194,7 @@ resource "azurerm_key_vault_secret" "sql_admin_loggin" {
   value        = var.login_for_sql
   key_vault_id = azurerm_key_vault.kv.id
 
-  depends_on   = [ azurerm_key_vault_access_policy.user_access_policy ]
+  depends_on = [azurerm_key_vault_access_policy.user_access_policy]
 }
 
 # SQL Server
@@ -206,19 +206,19 @@ resource "azurerm_mssql_server" "sql_server" {
   administrator_login          = var.login_for_sql
   administrator_login_password = var.password_for_sql
 
-  depends_on = [ azurerm_key_vault.kv ]
+  depends_on = [azurerm_key_vault.kv]
 }
 
 # SQL Database
 resource "azurerm_mssql_database" "sql_db" {
-  name                 = "db-bestrong"
-  server_id            = azurerm_mssql_server.sql_server.id
-  sku_name            = "GP_S_Gen5_2"
-  max_size_gb          = 32
-  zone_redundant       = true
-  storage_account_type = "Zone"
-  read_replica_count   = 1
-  min_capacity         = 2
+  name                        = "db-bestrong"
+  server_id                   = azurerm_mssql_server.sql_server.id
+  sku_name                    = "GP_S_Gen5_2"
+  max_size_gb                 = 32
+  zone_redundant              = true
+  storage_account_type        = "Zone"
+  read_replica_count          = 1
+  min_capacity                = 2
   auto_pause_delay_in_minutes = 60
 
 }

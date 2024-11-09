@@ -9,7 +9,7 @@ variable "resource_group_name" {
 }
 variable "password_for_sql" {
   description = "Password for sql server"
-  sensitive = true
+  sensitive   = true
 }
 variable "login_for_sql" {
   description = "Login for sql server"
