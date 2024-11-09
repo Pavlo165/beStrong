@@ -47,6 +47,7 @@ stages:
             env:
               TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
               TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+              TF_VAR_org_ip: $(TF_VAR_org_ip)
 
   - stage: Apply
     displayName: "Apply Terraform"
@@ -86,6 +87,7 @@ stages:
                 env:
                   TF_VAR_login_for_sql: $(TF_VAR_login_for_sql)
                   TF_VAR_password_for_sql: $(TF_VAR_password_for_sql)
+                  TF_VAR_org_ip: $(TF_VAR_org_ip)
               
               - task: AzureCLI@2
                 inputs:
