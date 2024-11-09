@@ -3,6 +3,7 @@ variable "location" {
   description = "Location for majority resourse"
   default     = "westeurope"
 }
+
 variable "resource_group_name" {
   description = "Name for resourse group"
   default     = "beStrongApp"
