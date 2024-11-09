@@ -100,7 +100,7 @@ stages:
                       --resource-group "beStrongApp" \
                       --account-name "beststrongstorage02" \
                       --ip-address $MY_IP
-                    az keyvault network-rule add \
+                    az keyvault network-rule remove \
                       --resource-group "beStrongApp" \
                       --name "kv-bestrong" \
                       --ip-address $MY_IP
