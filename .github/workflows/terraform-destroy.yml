@@ -1,3 +1,6 @@
+trigger: none
+pr: none
+
 variables:
 - group: terrafrom_var
 - group: Azure
