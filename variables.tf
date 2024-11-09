@@ -16,3 +16,7 @@ variable "login_for_sql" {
   description = "Login for sql server"
   sensitive   = true
 }
+variable "org_ip" {
+  description = "Public ip your organisation or you"
+  sensitive   = true
+}
