@@ -66,6 +66,7 @@ resource "azurerm_app_service_plan" "app_plan" {
   resource_group_name = azurerm_resource_group.rg.name
   kind                = "Linux"
   reserved            = true
+  
 
   sku {
     tier = "Basic"
@@ -92,6 +93,13 @@ resource "azurerm_app_service" "app" {
     "WEBSITE_CONTENTSHARE"                     = azurerm_storage_share.file_share.name
     "WEBSITE_VNET_ROUTE_ALL"                   = true
     WEBSITE_CONTENTOVERVNET                    = 1
+    # DOCKER_REGISTRY_SERVER_URL                 = azurerm_container_registry.acr.public_network_access_enabled
+    # DOCKER_REGISTRY_SERVER_USERNAME            = data.azurerm_container_registry.my-container-registry.admin_username
+    # DOCKER_REGISTRY_SERVER_PASSWORD            = data.azurerm_container_registry.my-container-registry.admin_password
+  }
+
+  site_config{
+    linux_fx_version = "DOCKER|nginx:latest"
   }
 }
 
